@@ -15,6 +15,8 @@ local attachpairs_start = misc.attachpairs_start
 
 local socket = require "socket"
 
+local yaml = require "yaml"
+
 local md5 = require "md5"
 local md5hex = md5.sumhexa
 
@@ -105,6 +107,28 @@ function dbmethods:update ( collection , selector , update , upsert , multiupdat
 
 	local m = "\0\0\0\0" .. full_collection_name ( self , collection ) .. num_to_le_uint ( flags ) .. selector .. update
 	return docmd ( self.conn , "UPDATE" , m )
+end
+
+function dbmethods:bulk_update(collection, updates, ordered, writeconcern)
+  local parameters = {
+    update=collection,
+    updates=updates,
+    ordered=ordered,
+    writeConcern=writeconcern
+  }
+  return self.conn:cmd(self.db, attachpairs_start(parameters, "update"))
+end
+
+function dbmethods:new_update(collection, selector, update, upsert, multi, ordered, writeconcern)
+  local parameters = {
+    update=collection,
+    updates={
+      { q=selector, u=update, upsert=upsert, multi=multi }
+    },
+    ordered=ordered,
+    writeConcern=writeconcern
+  }
+  return self.conn:cmd(self.db, attachpairs_start(parameters, "update"))
 end
 
 function dbmethods:insert ( collection , docs , continue_on_error )
@@ -299,12 +323,15 @@ function dbmethods:auth ( username , password )
 
 	local digest = md5hex ( r.nonce .. username .. pass_digest ( username , password ) )
 
-	return self.conn:cmd ( self.db , attachpairs_start ({
+	local parameters = {
 			authenticate = true ;
 			user = username ;
 			nonce = r.nonce ;
 			key = digest ;
-		 } , "authenticate" ) ) ~= nil
+		 }
+	local r, err = self.conn:cmd ( self.db , attachpairs_start (
+		  parameters, "authenticate" ) )
+        return r.ok == 1
 end
 
 function connmethods:new_db_handle ( db )

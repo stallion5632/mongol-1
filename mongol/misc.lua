@@ -26,19 +26,20 @@ end
 
 local pairs_start = function ( t , sk )
 	return function ( t , k , v )
+                        local nk, nv
 			if k == nil then
-				return sk , t [ sk ]
+			  return sk, t[sk]
 			else
-				local nk , nv = next ( t , k )
-				if nk == nil then
-					nk , nv = next ( t )
-					return nil
-				end
-				if nk == sk then
-					return nil
-				else
-					return nk,nv
-				end
+			   if k == sk then
+                             nk, nv = next(t)
+                           else
+			     nk, nv = next (t,k)
+                           end
+  			   if nk == sk then
+			     return next(t, sk)
+			   else
+			     return nk, nv
+  			   end
 			end
 		end , t
 end
