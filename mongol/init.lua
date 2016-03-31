@@ -226,10 +226,21 @@ function dbmethods:getmore ( collection , cursorID , numberToReturn , offset_i )
 	return handle_reply ( self.conn , req_id , offset_i )
 end
 
+function dbmethods:find_one(collection, query, returnfields, numberToSkip)
+	local query = query or {}
+	local cursorId, ret = self:query(collection, query, returnfields, numberToSkip, 1)
+  	if #ret == 1 then
+    	return ret[1]
+  	else 
+    	return nil
+  	end
+end
+
 -- Util functions
 
 -- returns a cursor
 dbmethods.find = new_cursor
+
 
 function connmethods:cmd ( db , q , collection )
 	collection = collection or "$cmd"

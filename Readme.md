@@ -1,6 +1,9 @@
 Mongol - Lua Mongodb Driver
 ===========================
 
+Fix: mongo auth failed in version 2.6.11 and later
+--------------------------
+
 Written by daurnimator
 
 License is MIT/X11
@@ -31,7 +34,7 @@ it takes a host (default localhost) and a port (default 27017);
 it returns a connection object.
 
 		mongol = require "mongol"
-		conn = mongol ( ) -- Connect to localhost:27017
+		conn = mongol ( '127.0.0.1', '27017' ) -- Connect to localhost:27017
 
 ###Connection objects have server wide methods.
 
@@ -99,10 +102,12 @@ Notes
 TL;DR
 ---------------------------
 		local mongol = require "mongol"
-		local conn = mongol ( ) -- Connect to localhost:27017
+		local conn = mongol ('127.0.0.1', '27017' ) -- Connect to localhost:27017
 		local db = conn:new_db_handle ( "mydatabase" )
 
 		assert ( db:auth ( "username" , "password" ) )
+		local t = db:find_one ( "mycollection" , { foo = "bar" } )
+		print(t)
 
 		for i , v in db:find ( "mycollection" , { foo = "bar" } ):pairs() do
 			print ( v )
