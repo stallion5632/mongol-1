@@ -15,8 +15,6 @@ local attachpairs_start = misc.attachpairs_start
 
 local socket = require "socket"
 
-local yaml = require "yaml"
-
 local md5 = require "md5"
 local md5hex = md5.sumhexa
 
